@@ -1,0 +1,6 @@
+{
+  "name": "ResQ-GIS — India Multi-Hazard GIS & Early Warning",
+  "description": "India Multi-Hazard GIS, AI Risk Analysis, Real-Time Early Warning, and Relocation Support System",
+  "requestFramePermissions": ["geolocation"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
