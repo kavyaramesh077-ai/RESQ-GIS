@@ -469,7 +469,73 @@ def realtime_stream():
             yield f"event: ping\ndata: {json.dumps(ping_data)}\n\n"
 
     return Response(stream_with_context(event_stream()), mimetype='text/event-stream')
+# Admin Authentication
+@app.route('/api/admin/login', methods=['POST'])
+def admin_login():
+    data = request.get_json() or {}
 
+    username = data.get('username', '').strip()
+    password = data.get('password', '').strip()
+    role = data.get('role', '')
+
+    valid_users = {
+        'admin@resq.gov.in': {
+            'name': 'ResQ-GIS Administrator',
+            'officerId': 'RESQ-ADMIN-001',
+            'agency': 'ResQ-GIS Command',
+            'role': 'District Disaster Operations Officer (SDMA)',
+            'securityClearance': 'Level-3'
+        },
+        'rajesh.kumar@sdma.kerala.gov.in': {
+            'name': 'Rajesh Kumar',
+            'officerId': 'SDMA-KL-001',
+            'agency': 'SDMA Kerala',
+            'role': 'District Disaster Operations Officer (SDMA)',
+            'securityClearance': 'Level-3'
+        },
+        'ananya.sen@ndma.gov.in': {
+            'name': 'Ananya Sen',
+            'officerId': 'NDMA-001',
+            'agency': 'NDMA',
+            'role': 'NDMA National Operations Coordinator',
+            'securityClearance': 'Level-3'
+        },
+        'gis.analyst@resq.gov.in': {
+            'name': 'Chief GIS Analyst',
+            'officerId': 'GIS-001',
+            'agency': 'ResQ-GIS',
+            'role': 'Chief Geospatial & GIS Analyst',
+            'securityClearance': 'Level-3'
+        }
+    }
+
+    if password != 'ResQ-Admin-2025' or username not in valid_users:
+        return jsonify({
+            'success': False,
+            'error': 'Invalid officer credentials'
+        }), 401
+
+    officer = valid_users[username].copy()
+
+    if role:
+        officer['role'] = role
+
+    officer['username'] = username
+    officer['loginTime'] = datetime.utcnow().isoformat() + 'Z'
+
+    return jsonify({
+        'success': True,
+        'token': f'resq-demo-token-{int(time.time())}',
+        'officer': officer
+    })
+
+
+@app.route('/api/admin/logout', methods=['POST'])
+def admin_logout():
+    return jsonify({
+        'success': True,
+        'message': 'Admin session terminated'
+    })
 if __name__ == '__main__':
     port = int(os.environ.get('FLASK_PORT', 5000))
     print(f"[ResQ-GIS] Starting Python Flask Gateway on port {port}...")
